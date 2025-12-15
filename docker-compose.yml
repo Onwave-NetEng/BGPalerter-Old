@@ -1,6 +1,6 @@
 services:
   bgpalerter:
-    image: nttgin/bgpalerter:2.0.1
+    image: nttgin/bgpalerter:latest
     container_name: bgpalerter
     restart: unless-stopped
 
