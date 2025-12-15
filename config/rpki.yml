@@ -1,0 +1,6 @@
+rpki:
+  enabled: true
+  sources:
+    - https://rpki.cloudflare.com/rpki.json
+    - https://rpki.gin.ntt.net/api/export.json
+

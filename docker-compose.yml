@@ -1,0 +1,15 @@
+services:
+  bgpalerter:
+    image: nttgin/bgpalerter:2.0.1
+    container_name: bgpalerter
+    restart: unless-stopped
+
+    volumes:
+      - ./config:/opt/bgpalerter/config:rw
+      - ./config/config.yml:/opt/bgpalerter/config.yml:ro
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

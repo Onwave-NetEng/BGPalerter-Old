@@ -1,0 +1,41 @@
+environment: production
+
+volume: /opt/bgpalerter/
+
+logging:
+  directory: logs/
+
+monitors:
+  - type: BGPStream
+    enabled: true
+    collectors:
+      - route-views
+      - ris
+
+statics:
+  enabled: true
+  monitoredPrefixesFiles:
+    - prefixes.yml
+
+alerts:
+  email:
+    enabled: true
+    from: "bgpalerter@onwave.com"
+    to:
+      - "iain.murdoch@onwave.com"
+    smtp:
+      host: "smtp.example.com"
+      port: 25
+      secure: false
+      auth: false
+
+  slack:
+    enabled: false
+    webhookUrl: ""
+
+modules:
+  prefix:
+    enabled: true
+  rpki:
+    enabled: true
+
