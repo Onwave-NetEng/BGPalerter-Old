@@ -5,11 +5,11 @@ services:
     restart: unless-stopped
 
     volumes:
-      - ./config:/opt/bgpalerter/config:rw
-      - ./config/config.yml:/opt/bgpalerter/config.yml:ro
+      - ./config:/opt/bgpalerter/config:ro
 
     logging:
       driver: json-file
       options:
         max-size: "10m"
         max-file: "5"
+
