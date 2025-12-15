@@ -33,10 +33,13 @@ alerts:
     to:
       - "iain.murdoch@onwave.com"
     smtp:
-      host: "smtp.example.com"
+      host: "onwave-com.mail.protection.outlook.com"
       port: 25
       secure: false
-      auth: false
+      auth:
+          user: "bgpalerter@onwave-com.mail.protection.outlook.com"
+          pass: ""
+          type: login
 
   slack:
     enabled: false
