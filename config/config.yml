@@ -35,11 +35,12 @@ alerts:
     smtp:
       host: "onwave-com.mail.protection.outlook.com"
       port: 25
-      secure: false
+      secure: true
+      ingnoreTLS: false	
       auth:
-          user: "bgpalerter@onwave-com.mail.protection.outlook.com"
-          pass: ""
-          type: login
+        user: "bgpalerter@onwave-com.mail.protection.outlook.com"
+        pass: ""
+        type: login
 
   slack:
     enabled: false
@@ -50,4 +51,3 @@ modules:
     enabled: true
   rpki:
     enabled: true
-
