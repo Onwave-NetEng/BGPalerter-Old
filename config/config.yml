@@ -12,6 +12,15 @@ monitors:
       - route-views
       - ris
 
+irr:
+  enabled: true
+  sources:
+    - RADB
+    - RIPE
+
+asns:
+  - AS58173
+
 statics:
   enabled: true
   monitoredPrefixesFiles:
