@@ -1,4 +1,10 @@
 services:
+  healthcheck:
+    test: ["CMD", "node", "-e", "process.exit(0)"]
+    interval: 30s
+    timeout: 10s
+    retries: 3
+
   bgpalerter:
     image: nttgin/bgpalerter:latest
     container_name: bgpalerter
@@ -12,5 +18,4 @@ services:
       - ./config/groups.yml:/opt/bgpalerter/config/groups.yml:ro
       - ./config/rpki.yml:/opt/bgpalerter/config/rpki.yml:ro
       - ./config/subs.yml:/opt/bgpalerter/config/subs.yml:ro
-
 
