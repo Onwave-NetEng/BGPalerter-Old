@@ -5,9 +5,16 @@ services:
     restart: unless-stopped
 
     volumes:
+      # Mount individual config files EXACTLY where BGPalerter expects them
       - ./config/config.yml:/opt/bgpalerter/config.yml:ro
-      - ./config:/opt/bgpalerter/config
-      - ./logs:/opt/bgpalerter/logs
+      - ./config/prefixes.yml:/opt/bgpalerter/prefixes.yml:ro
+      - ./config/groups.yml:/opt/bgpalerter/groups.yml:ro
+      - ./config/rpki.yml:/opt/bgpalerter/rpki.yml:ro
+      - ./config/subs.yml:/opt/bgpalerter/subs.yml:ro
+      - ./config/irr.yml:/opt/bgpalerter/irr.yml:ro
+
+      # Logs
+      - ./config/irr.yml:/opt/bgpalerter/irr.yml:ro
 
     logging:
       driver: json-file
