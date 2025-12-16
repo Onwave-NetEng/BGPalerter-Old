@@ -36,7 +36,7 @@ alerts:
       host: "onwave-com.mail.protection.outlook.com"
       port: 25
       secure: true
-      ingnoreTLS: false	
+      ignoreTLS: false	
       auth:
         user: "bgpalerter@onwave-com.mail.protection.outlook.com"
         pass: ""
