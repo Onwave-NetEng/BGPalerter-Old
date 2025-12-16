@@ -1,21 +1,16 @@
 services:
-  healthcheck:
-    test: ["CMD", "node", "-e", "process.exit(0)"]
-    interval: 30s
-    timeout: 10s
-    retries: 3
-
   bgpalerter:
     image: nttgin/bgpalerter:latest
     container_name: bgpalerter
-    restart: always
-    environment:
-      - BGPALERTER_NO_INTERACTIVE=true
-    volumes:
-      - ./config:/opt/bgpalerter/config:ro
-      - ./config/config.yml:/opt/bgpalerter/config.yml:ro
-      - ./config/prefixes.yml:/opt/bgpalerter/config/prefixes.yml:ro
-      - ./config/groups.yml:/opt/bgpalerter/config/groups.yml:ro
-      - ./config/rpki.yml:/opt/bgpalerter/config/rpki.yml:ro
-      - ./config/subs.yml:/opt/bgpalerter/config/subs.yml:ro
+    restart: unless-stopped
 
+    volumes:
+      - ./config/config.yml:/opt/bgpalerter/config.yml:ro
+      - ./config:/opt/bgpalerter/config
+      - ./logs:/opt/bgpalerter/logs
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"

@@ -1,20 +1,29 @@
-# Using RIPE RIS Live websocket as per upstream example
+environment: production
+configVersion: 2
+
+# Logging
+logging:
+  directory: logs
+  logRotatePattern: YYYY-MM-DD
+  maxRetainedFiles: 10
+  maxFileSizeMB: 15
+  compressOnRotation: false
+  useUTC: true
+
+# Connectors
 connectors:
   - file: connectorRIS
     name: ris
     params:
       url: ws://ris-live.ripe.net/v1/ws/
       perMessageDeflate: true
-      authorizationHeader: null
       carefulSubscription: true
-      socketOptions: {}
       includeRaw: false
       subscription:
         type: UPDATE
         moreSpecific: true
-      blacklistSources: []
 
-# Monitors (MUST use "file:", NOT "type:")
+# Monitors
 monitors:
   - file: monitorHijack
     channel: hijack
@@ -61,84 +70,29 @@ monitors:
     params:
       enableDiffAlerts: true
       enableExpirationAlerts: true
-      enableExpirationCheckTA: true
-      enableDeletedCheckTA: true
-      enableAdvancedRpkiStats: false
       roaExpirationAlertHours: 24
-      checkOnlyASns: true
-      toleranceDeletedRoasTA:
-        ripe: 20
-        apnic: 20
-        arin: 20
-        lacnic: 20
-        afrinic: 50
-      toleranceExpiredRoasTA:
-        ripe: 20
-        apnic: 20
-        arin: 20
-        lacnic: 20
-        afrinic: 50
 
-# Reports (outputs)
+# Reports
 reports:
-  # Always useful for troubleshooting
   - file: reportFile
-    channels:
-      - hijack
-      - newprefix
-      - visibility
-      - path
-      - misconfiguration
-      - rpki
-      - roa
+    channels: [hijack, newprefix, visibility, path, misconfiguration, rpki, roa]
     params:
       persistAlertData: false
       alertDataDirectory: alertdata/
 
-  # Email enabled (Slack disabled)
   - file: reportEmail
-    channels:
-      - hijack
-      - newprefix
-      - visibility
-      - path
-      - misconfiguration
-      - rpki
-      - roa
+    channels: [hijack, newprefix, visibility, path, misconfiguration, rpki, roa]
     params:
-      showPaths: 5
       senderEmail: "bgpalerter@onwave.com"
       smtp:
         host: "onwave-com.mail.protection.outlook.com"
         port: 25
         secure: false
-        ignoreTLS: false
-        auth:
-          user: "bgpalerter@onwave-com.mail.protection.outlook.com"
-          pass: ""
-          type: login
-      tls:
-        rejectUnauthorized: true
       notifiedEmails:
         default:
           - "iain.murdoch@onwave.com"
 
-# Logging
-logging:
-  directory: logs
-  logRotatePattern: YYYY-MM-DD
-  maxRetainedFiles: 10
-  maxFileSizeMB: 15
-  compressOnRotation: false
-  useUTC: true
-
-# REST API (optional)
-rest:
-  host: localhost
-  port: 8011
-
-# Prefixes / groups files
-# (These are in /opt/bgpalerter/config/ inside the container)
+# Prefixes & groups
 monitoredPrefixesFiles:
   - prefixes.yml
 
@@ -149,9 +103,3 @@ rpki:
   vrpProvider: rpkiclient
   refreshVrpListMinutes: 15
   markDataAsStaleAfterMinutes: 120
-
-# Misc
-notificationIntervalSeconds: 86400
-persistStatus: true
-environment: production
-configVersion: 2
