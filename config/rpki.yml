@@ -1,5 +1,4 @@
-rpki:
-  enabled: true
-  sources:
-    - https://rpki.cloudflare.com/rpki.json
-    - https://rpki.gin.ntt.net/api/export.json
+enabled: true
+sources:
+  - name: ripe
+    url: https://rpki-validator.ripe.net/api/export.json
