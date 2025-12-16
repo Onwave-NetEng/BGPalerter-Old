@@ -1,53 +1,157 @@
-environment: production
+# Using RIPE RIS Live websocket as per upstream example
+connectors:
+  - file: connectorRIS
+    name: ris
+    params:
+      url: ws://ris-live.ripe.net/v1/ws/
+      perMessageDeflate: true
+      authorizationHeader: null
+      carefulSubscription: true
+      socketOptions: {}
+      includeRaw: false
+      subscription:
+        type: UPDATE
+        moreSpecific: true
+      blacklistSources: []
 
-volume: /opt/bgpalerter/
-
-logging:
-  directory: logs/
-
+# Monitors (MUST use "file:", NOT "type:")
 monitors:
-  - type: bgpstream
-    enabled: true
-    collectors:
-      - route-views
-      - ris
+  - file: monitorHijack
+    channel: hijack
+    name: basic-hijack-detection
+    params:
+      thresholdMinPeers: 3
 
-irr:
-  enabled: true
-  sources:
-    - RADB
-    - RIPE
+  - file: monitorNewPrefix
+    channel: newprefix
+    name: new-prefix-detection
+    params:
+      thresholdMinPeers: 3
 
-asns:
-  - AS58173
+  - file: monitorVisibility
+    channel: visibility
+    name: withdrawal-detection
+    params:
+      thresholdMinPeers: 40
 
-statics:
-  enabled: true
-  monitoredPrefixesFiles:
-    - prefixes.yml
+  - file: monitorPath
+    channel: path
+    name: path-matching
+    params:
+      thresholdMinPeers: 1
 
-alerts:
-  email:
-    enabled: true
-    from: "bgpalerter@onwave.com"
-    to:
-      - "iain.murdoch@onwave.com"
-    smtp:
-      host: "onwave-com.mail.protection.outlook.com"
-      port: 25
-      secure: true
-      ignoreTLS: false	
-      auth:
-        user: "bgpalerter@onwave-com.mail.protection.outlook.com"
-        pass: ""
-        type: login
+  - file: monitorAS
+    channel: misconfiguration
+    name: asn-monitor
+    params:
+      thresholdMinPeers: 3
+      skipPrefixMatch: false
 
-  slack:
-    enabled: false
-    webhookUrl: ""
+  - file: monitorRPKI
+    channel: rpki
+    name: rpki-monitor
+    params:
+      thresholdMinPeers: 3
+      checkUncovered: false
+      checkDisappearing: false
 
-modules:
-  prefix:
-    enabled: true
-  rpki:
-    enabled: true
+  - file: monitorROAS
+    channel: roa
+    name: rpki-diff
+    params:
+      enableDiffAlerts: true
+      enableExpirationAlerts: true
+      enableExpirationCheckTA: true
+      enableDeletedCheckTA: true
+      enableAdvancedRpkiStats: false
+      roaExpirationAlertHours: 24
+      checkOnlyASns: true
+      toleranceDeletedRoasTA:
+        ripe: 20
+        apnic: 20
+        arin: 20
+        lacnic: 20
+        afrinic: 50
+      toleranceExpiredRoasTA:
+        ripe: 20
+        apnic: 20
+        arin: 20
+        lacnic: 20
+        afrinic: 50
+
+# Reports (outputs)
+reports:
+  # Always useful for troubleshooting
+  - file: reportFile
+    channels:
+      - hijack
+      - newprefix
+      - visibility
+      - path
+      - misconfiguration
+      - rpki
+      - roa
+    params:
+      persistAlertData: false
+      alertDataDirectory: alertdata/
+
+  # Email enabled (Slack disabled)
+  - file: reportEmail
+    channels:
+      - hijack
+      - newprefix
+      - visibility
+      - path
+      - misconfiguration
+      - rpki
+      - roa
+    params:
+      showPaths: 5
+      senderEmail: "bgpalerter@onwave.com"
+      smtp:
+        host: "onwave-com.mail.protection.outlook.com"
+        port: 25
+        secure: false
+        ignoreTLS: false
+        auth:
+          user: "bgpalerter@onwave-com.mail.protection.outlook.com"
+          pass: ""
+          type: login
+      tls:
+        rejectUnauthorized: true
+      notifiedEmails:
+        default:
+          - "iain.murdoch@onwave.com"
+
+# Logging
+logging:
+  directory: logs
+  logRotatePattern: YYYY-MM-DD
+  maxRetainedFiles: 10
+  maxFileSizeMB: 15
+  compressOnRotation: false
+  useUTC: true
+
+# REST API (optional)
+rest:
+  host: localhost
+  port: 8011
+
+# Prefixes / groups files
+# (These are in /opt/bgpalerter/config/ inside the container)
+monitoredPrefixesFiles:
+  - prefixes.yml
+
+groupsFile: groups.yml
+
+# RPKI
+rpki:
+  vrpProvider: rpkiclient
+  refreshVrpListMinutes: 15
+  markDataAsStaleAfterMinutes: 120
+
+# Misc
+notificationIntervalSeconds: 86400
+persistStatus: true
+environment: production
+configVersion: 2
