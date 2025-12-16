@@ -6,7 +6,7 @@ logging:
   directory: logs/
 
 monitors:
-  - type: BGPStream
+  - type: bgpstream
     enabled: true
     collectors:
       - route-views
