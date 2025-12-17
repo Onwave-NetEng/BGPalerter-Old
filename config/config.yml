@@ -103,3 +103,9 @@ rpki:
   vrpProvider: rpkiclient
   refreshVrpListMinutes: 15
   markDataAsStaleAfterMinutes: 120
+
+# REST API
+rest:
+  host: localhost
+  port: 8011
+

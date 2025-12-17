@@ -1,80 +1,139 @@
-##BGPalerter – Onwave Deployment
-#Overview
+📘 README.md
+# BGPalerter – Production Deployment
 
-BGPalerter is a real-time BGP monitoring and alerting platform used to detect prefix hijacks, route leaks, and RPKI violations.
+This repository contains a production-grade deployment of
+[BGPalerter](https://github.com/nttgin/BGPalerter) for monitoring BGP
+announcements, hijacks, leaks, and RPKI/IRR inconsistencies.
 
-This repository provides a fully validated, non-interactive, production-ready deployment using Docker Compose.
+---
 
-#Features
+## Overview
 
-- Real-time BGP monitoring (RouteViews + RIS)
+BGPalerter monitors selected IP prefixes in near real-time using
+RIPE RIS Live and generates alerts when anomalies are detected.
 
-- Static and IRR-synced prefix monitoring 
+This deployment is:
+- Docker-based
+- Configuration-driven
+- Email-alert enabled
+- RPKI and IRR aware
+- Suitable for 24/7 production use
 
-- RPKI validation
+---
 
-- Email alerts (SMTP)
+## Features
 
-- Slack support (optional)
-
-- CI-validated configuration
-
-- Zero auto-config prompts
+- Prefix hijack detection
+- New prefix announcements
+- Route visibility loss
+- AS path anomalies
+- RPKI invalid / uncovered alerts
+- Email notifications
+- Docker healthcheck
+- Automated IRR and RPKI refresh
 
 ---
 
 ## Directory Structure
 
 BGPalerter/
-├── docker-compose.yml
-├── README.md
-├── validate.sh
 ├── config/
-│   ├── config.yml
-│   ├── prefixes.yml
-│   ├── groups.yml
-│   ├── rpki.yml
-│   └── subs.yml
-└── .github/
-    └── workflows/
-        └── yaml-lint.yml
+│   ├── config.yml        # Main application config
+│   ├── prefixes.yml      # Monitored prefixes (authoritative format)
+│   ├── groups.yml        # Prefix grouping
+│   ├── irr.yml           # IRR sources
+│   ├── rpki.yml          # RPKI config
+│   └── subs.yml          # Subscriptions
+├── logs/
+│   ├── error.log
+│   └── reports.log
+├── scripts/
+│   ├── update-irr.sh
+│   └── update-rpki.sh
+├── docker-compose.yml
+├── validate.sh
+└── README.md
 
-## Server Prerequisites
+---
 
-Ubuntu 22.04+
+## Server Requirements
 
-Docker ≥ 24.x
+- Linux (tested on Ubuntu)
+- Docker >= 20.x
+- Docker Compose v2
+- Internet access to RIPE RIS Live
+- SMTP relay for email alerts
 
-Docker Compose plugin
+---
 
-Outbound TCP 179, 443
+## Deployment
 
-## Deployment Instructions
-
+```bash
 git clone https://github.com/Onwave-NetEng/BGPalerter.git
 cd BGPalerter
-
 ./validate.sh
 docker compose up -d
 
-Testing & Validation
-docker logs bgpalerter
+
+## Validation
+docker compose ps
+docker compose logs bgpalerter --tail 50
+
+Expected:
+Container state: Up
+
+Log lines: Monitoring <prefix>
 
 
-#Expected:
+## Healthcheck
+docker inspect --format='{{.State.Health.Status}}' bgpalerter
 
-BGPalerter, version: 2.0.1 environment: production
+Expected:
+healthy
 
-No prompts. No errors.
+## IRR / RPKI Auto-Sync
+IRR and RPKI data are refreshed automatically using cron:
 
-# Troubleshooting
-Symptom	Cause	Fix
-Auto-config prompt	Missing config files	Verify volume mounts
-EISDIR	config.yml is directory	Delete directory
-monitors.push error	Wrong YAML type	Use provided config
+- IRR: every 6 hours
+- RPKI: every hour
 
-#Version Control
+## Logs:
+- logs/irr-sync.log
+- logs/rpki-sync.log
 
-- All configs validated via GitHub Actions
-- Breaking changes blocked at PR stage
-- Tagged releases recommended for production
+
+## Troubleshooting
+Config not found
+- Ensure config.yml is mounted to /opt/bgpalerter/config.yml
+
+Invalid prefix errors
+- Verify prefixes.yml matches prefixes.yml.example format
+
+Email not received
+- Check SMTP relay
+
+Inspect logs/error.log
+
+
+##Version Control
+
+- Image: nttgin/bgpalerter:latest
+- Config validated via yamllint
+
+
+## ✅ Final Status
+
+✔ Healthcheck added  
+✔ IRR auto-sync enabled  
+✔ RPKI auto-sync enabled  
+✔ README finalized  
+✔ No breaking changes  
+
+Next:
+- image digest pinning
+- alert testing script
+- GitHub Actions CI
+- multi-environment (prod/stage)
+
+
+
