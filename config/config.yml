@@ -106,6 +106,11 @@ rpki:
 
 # REST API
 rest:
-  host: localhost
+  host: 0.0.0.0
   port: 8011
 
+# Process monitoring for health checks
+processMonitors:
+  - file: uptimeApi
+    params:
+      useStatusCodes: true
