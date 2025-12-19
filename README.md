@@ -88,14 +88,24 @@ Log lines: Monitoring <prefix>
 ## Healthcheck
 docker inspect --format='{{.State.Health.Status}}' bgpalerter
 
-Expected:
-healthy
+Expected result: healthy
 
-## IRR / RPKI Auto-Sync
-IRR and RPKI data are refreshed automatically using cron:
+If you see unhealthy, check the logs:
+docker compose logs bgpalerter --tail 50
 
-- IRR: every 6 hours
-- RPKI: every hour
+The health check uses the REST API on port 8011. You can manually check it:
+curl http://127.0.0.1:8011/status
+
+## RPKI Auto-Refresh
+ 
+RPKI validation data is automatically refreshed by BGPalerter every 15 minutes.
+This is handled internally by the application - no external scripts or cron jobs needed.
+ 
+Configuration: See `rpki:` section in config/config.yml
+ 
+To verify RPKI is working:
+```bash
+docker compose logs bgpalerter | grep -i rpki
 
 ## Logs:
 - logs/irr-sync.log
@@ -121,19 +131,65 @@ Inspect logs/error.log
 - Config validated via yamllint
 
 
-## ✅ Final Status
+Common Issues and Solutions
+Health Check Shows "Unhealthy"
+Cause: The REST API isn't responding.
 
-✔ Healthcheck added  
-✔ IRR auto-sync enabled  
-✔ RPKI auto-sync enabled  
-✔ README finalized  
-✔ No breaking changes  
+Solution:
+22	Check logs: docker compose logs bgpalerter --tail 50
+23	Verify API is running: curl http://127.0.0.1:8011/status
+24	Check config.yml has processMonitors section enabled
 
-Next:
-- image digest pinning
-- alert testing script
-- GitHub Actions CI
-- multi-environment (prod/stage)
+No Email Alerts Received
+Cause: SMTP configuration issue or network problem.
 
+Solution:
+25	Check SMTP settings in config/config.yml
+26	Verify the Docker host can reach the SMTP server:
+telnet onwave-com.mail.protection.outlook.com 25
+27	Check BGPalerter logs for email errors:
+docker compose logs bgpalerter | grep -i email
+
+Container Keeps Restarting
+Cause: Configuration error or resource issue.
+
+Solution:
+28	Check logs: docker compose logs bgpalerter
+29	Validate YAML syntax: yamllint config/config.yml
+30	Check available memory: free -h
+31	Verify prefixes.yml format is correct
+
+"Connection refused" to RIPE RIS
+Cause: Network connectivity issue or RIPE RIS maintenance.
+
+Solution:
+32	Check internet connectivity from Docker container
+33	Check RIPE RIS status: https://ris-live.ripe.net/
+34	Wait a few minutes - BGPalerter will automatically reconnect
+ 
+#### Step 5: Save the File
+ 
+Save and exit (Ctrl+X, Y, Enter).
+ 
+---
+ 
+## Fix 5: Clean Up Unused Configuration Files (MINOR)
+ 
+### What's Wrong
+ 
+Your deployment has three configuration files that **don't do anything**:
+- `config/irr.yml`
+- `config/rpki.yml`
+- `config/subs.yml`
+ 
+BGPalerter v2.x doesn't use these files. All configuration goes in the main `config.yml` file.
+ 
+### Step-by-Step Fix
+ 
+#### Option A: Delete Them (Recommended)
+ 
+```bash
+cd /home/net-eng/BGPalerter/config
+rm irr.yml rpki.yml subs.yml
 
 

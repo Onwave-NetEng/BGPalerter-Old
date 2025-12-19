@@ -1,8 +1,16 @@
-# BGPalerter v2 Configuration File - Corrected for AS58173
-configVersion: 2
 environment: production
+configVersion: 2
 
-# Data sources for BGP updates
+# Logging
+logging:
+  directory: logs
+  logRotatePattern: YYYY-MM-DD
+  maxRetainedFiles: 10
+  maxFileSizeMB: 15
+  compressOnRotation: false
+  useUTC: true
+
+# Connectors
 connectors:
   - file: connectorRIS
     name: ris
@@ -15,7 +23,7 @@ connectors:
         type: UPDATE
         moreSpecific: true
 
-# Monitoring modules
+# Monitors
 monitors:
   - file: monitorHijack
     channel: hijack
@@ -64,14 +72,7 @@ monitors:
       enableExpirationAlerts: true
       roaExpirationAlertHours: 24
 
-  # ADDED: Upstream path neighbor monitoring
-  - file: monitorPathNeighbors
-    channel: path
-    name: path-neighbors
-    params:
-      thresholdMinPeers: 3
-
-# Reporting modules
+# Reports
 reports:
   - file: reportFile
     channels: [hijack, newprefix, visibility, path, misconfiguration, rpki, roa]
@@ -91,19 +92,19 @@ reports:
         default:
           - "iain.murdoch@onwave.com"
 
-# Files for prefixes and groups
+# Prefixes & groups
 monitoredPrefixesFiles:
   - prefixes.yml
 
 groupsFile: groups.yml
 
-# RPKI validation settings
+# RPKI
 rpki:
   vrpProvider: rpkiclient
   refreshVrpListMinutes: 15
   markDataAsStaleAfterMinutes: 120
 
-# REST API for health checks
+# REST API
 rest:
   host: 0.0.0.0
   port: 8011
@@ -113,18 +114,3 @@ processMonitors:
   - file: uptimeApi
     params:
       useStatusCodes: true
-
-# Logging settings
-logging:
-  directory: logs
-  logRotatePattern: YYYY-MM-DD
-  maxRetainedFiles: 10
-  maxFileSizeMB: 15
-  compressOnRotation: false
-  useUTC: true
-
-# Advanced settings
-notificationIntervalSeconds: 86400
-persistStatus: true
-checkForUpdatesAtBoot: true
-
