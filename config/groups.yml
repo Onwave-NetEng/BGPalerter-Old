@@ -1,8 +1,0 @@
-groups:
-  Onwave:
-    name: "Onwave Prefixes"
-    description: "All monitored ASNs related to Onwave"
-    asns:
-      - 58173
-      - 174
-      - 6762

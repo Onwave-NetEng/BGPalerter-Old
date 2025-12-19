@@ -1,4 +1,0 @@
-enabled: true
-sources:
-  - name: RADB
-    host: whois.radb.net
