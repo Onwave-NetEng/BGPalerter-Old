@@ -9,59 +9,105 @@ Complete BGP monitoring solution with backend engine, comprehensive dashboard, a
 ```
 BGPalerter/
 ├── README.md                    # This file
+├── INSTALL.md                   # Installation guide (NEW)
 │
 ├── BGPalerter/                  # Backend monitoring engine
 │   ├── config/                  # BGPalerter configuration
 │   │   ├── config.yml           # Main configuration
+│   │   ├── prefixes.yml         # Monitored prefixes (NEW)
 │   │   └── groups.yml           # Prefix grouping
+│   ├── .yamllint                # YAML linter config (NEW)
 │   ├── docker-compose.yml       # Docker deployment
+│   ├── validate.sh              # Config validation (NEW)
 │   └── README.md                # Backend documentation
 │
-├── BGPalerter-frontend/         # Comprehensive dashboard (NEW)
+├── BGPalerter-frontend/         # Comprehensive dashboard
 │   ├── client/                  # React 19 frontend
 │   ├── server/                  # Node.js 22 backend (tRPC)
 │   ├── scripts/                 # Deployment automation
 │   ├── docs/                    # Documentation
 │   └── README.md                # Dashboard documentation
 │
-└── BGPalerter-standalone/       # Legacy standalone dashboard
-    ├── src/                     # React + Vite frontend
-    ├── config/                  # Configuration files
-    └── README.md                # Standalone documentation
+├── BGPalerter-standalone/       # Legacy standalone dashboard
+│   ├── src/                     # React + Vite frontend
+│   ├── config/                  # Configuration files
+│   └── README.md                # Standalone documentation
+│
+└── deploy/                      # Deployment automation (NEW)
+    ├── orchestrator.py          # Module execution engine
+    ├── modules/                 # Deployment modules
+    │   ├── docker.sh            # Docker installation
+    │   ├── nodejs.sh            # Node.js installation
+    │   ├── pnpm.sh              # pnpm installation
+    │   ├── pm2.sh               # PM2 installation
+    │   ├── bgpalerter.sh        # Backend deployment
+    │   └── dashboard.sh         # Dashboard deployment
+    └── README.md                # Deployment documentation
 ```
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Start BGPalerter Backend
+### Automated Installation (Recommended)
+
+Deploy the complete BGPalerter system with a single command using our automated deployment system.
+
+```bash
+git clone https://github.com/Onwave-NetEng/BGPalerter.git
+cd BGPalerter/deploy
+./orchestrator.py docker nodejs pnpm pm2 bgpalerter dashboard
+```
+
+**What this installs:**
+- Docker Engine (BGPalerter backend container)
+- Node.js 22 (JavaScript runtime)
+- pnpm (Package manager)
+- PM2 (Process manager)
+- BGPalerter backend (monitoring engine on port 8011)
+- BGPalerter dashboard (web interface on port 3000)
+
+**Installation time:** 5-10 minutes
+
+**Access dashboard:** http://localhost:3000
+
+**Detailed guide:** See [INSTALL.md](INSTALL.md) for step-by-step instructions, validation, testing, and troubleshooting.
+
+---
+
+### Manual Installation (Advanced)
+
+For manual control over each component, deploy services individually.
+
+**1. Start BGPalerter Backend:**
 
 ```bash
 cd BGPalerter
 docker compose up -d
 
 # Verify it's running
-curl http://localhost:8011/api/v1/status
+curl http://localhost:8011/status
 ```
 
-### 2. Deploy Comprehensive Dashboard
+**2. Deploy Dashboard:**
 
 ```bash
 cd BGPalerter-frontend
-bash scripts/pre-deploy-check.sh
-bash scripts/deploy-safe.sh
+pnpm install
+pnpm build
+pm2 start ecosystem.config.js
 
-# Access at http://your-server:3000
+# Access at http://localhost:3000
 ```
 
-### 3. (Optional) Deploy Legacy Dashboard
+**3. (Optional) Deploy Legacy Dashboard:**
 
 ```bash
 cd BGPalerter-standalone
 npm install
 npm run dev
 
-# Access at http://your-server:5173
+# Access at http://localhost:5173
 ```
 
 ---
@@ -165,9 +211,10 @@ npm run dev
 ## 📖 Documentation
 
 ### Getting Started
-1. [BGPalerter Backend Setup](BGPalerter/README.md)
-2. [Dashboard Quick Start](BGPalerter-frontend/QUICK_START.md)
-3. [Deployment Guide](BGPalerter-frontend/DEPLOYMENT_GUIDE.md)
+1. **[Installation Guide](INSTALL.md)** - Step-by-step installation, validation, and testing
+2. [Deployment Automation](deploy/README.md) - Modular deployment system documentation
+3. [BGPalerter Backend Setup](BGPalerter/README.md) - Backend configuration and usage
+4. [Dashboard Deployment Guide](BGPalerter-frontend/DEPLOYMENT_GUIDE.md) - Comprehensive deployment reference
 
 ### Administration
 - [Systems Administration Guide](BGPalerter-frontend/SYSTEMS_ADMINISTRATION.md)
