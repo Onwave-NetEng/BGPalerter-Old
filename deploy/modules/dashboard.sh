@@ -149,37 +149,120 @@ validate() {
     output_json "running" 95 "Validating deployment" "Checking dashboard status"
     
     # Wait for dashboard to start
+    echo "Waiting for PM2 to initialize process..."
     sleep 5
     
-    # Check if PM2 process is running
+    # Check if PM2 process exists (any status)
+    if ! pm2 list | grep -q "bgpalerter-dashboard"; then
+        echo "❌ CRITICAL: PM2 process 'bgpalerter-dashboard' does not exist"
+        echo ""
+        echo "PM2 Process List:"
+        pm2 list
+        echo ""
+        echo "Possible causes:"
+        echo "  1. ecosystem.config.js has incorrect configuration"
+        echo "  2. PM2 start command failed silently"
+        echo "  3. Working directory mismatch"
+        echo ""
+        echo "Diagnostic steps:"
+        echo "  cd ../BGPalerter-frontend"
+        echo "  cat ecosystem.config.js  # Check configuration"
+        echo "  pm2 start ecosystem.config.js  # Try manual start"
+        echo "  pm2 logs --lines 100  # Check all PM2 logs"
+        output_json "error" 95 "PM2 process does not exist" "Dashboard was never added to PM2. Check ecosystem.config.js"
+        exit 1
+    fi
+    
+    # Check if PM2 process is online
     if ! pm2 list | grep -q "bgpalerter-dashboard.*online"; then
-        echo "Error: Dashboard process not running in PM2"
+        echo "❌ ERROR: Dashboard process exists but is not 'online'"
+        echo ""
         echo "PM2 Status:"
         pm2 list
-        echo "\nPM2 Logs (last 50 lines):"
-        pm2 logs bgpalerter-dashboard --lines 50 --nostream || true
+        echo ""
+        echo "PM2 Logs (last 100 lines):"
+        pm2 logs bgpalerter-dashboard --lines 100 --nostream || true
+        echo ""
+        echo "Common issues:"
+        echo "  - Application crashed on startup (check logs above)"
+        echo "  - Missing dependencies (run: pnpm install)"
+        echo "  - Port 3000 already in use (check: netstat -tlnp | grep 3000)"
+        echo "  - Database connection failed (check .env file)"
+        echo ""
+        echo "Recovery steps:"
+        echo "  cd ../BGPalerter-frontend"
+        echo "  ./scripts/diagnose-dashboard.sh  # Run full diagnostic"
+        echo "  ./scripts/recover-dashboard.sh   # Automated recovery"
         output_json "error" 95 "Dashboard not running in PM2" "PM2 process failed to start. Check logs above."
         exit 1
     fi
     
+    echo "✅ PM2 process is online"
+    
+    # Verify PM2 process details
+    echo ""
+    echo "PM2 Process Details:"
+    pm2 show bgpalerter-dashboard || true
+    
     # Check if dashboard is responding (with retry)
-    echo "Waiting for dashboard to respond on port 3000..."
+    echo ""
+    echo "Waiting for dashboard HTTP endpoint to respond on port 3000..."
     MAX_WAIT=30
     WAIT_TIME=0
+    HTTP_ATTEMPTS=0
     while [ $WAIT_TIME -lt $MAX_WAIT ]; do
+        HTTP_ATTEMPTS=$((HTTP_ATTEMPTS + 1))
         if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+            echo "✅ Dashboard HTTP endpoint responding (attempt $HTTP_ATTEMPTS)"
+            
+            # Additional validation: Check if API endpoint works
+            echo ""
+            echo "Validating dashboard API endpoint..."
+            if curl -sf http://localhost:3000/api/trpc/system.getStatus > /dev/null 2>&1; then
+                echo "✅ Dashboard API endpoint responding"
+            else
+                echo "⚠️  Dashboard HTTP works but API may not be ready yet"
+            fi
+            
             output_json "success" 100 "Dashboard deployed successfully" "BGPalerter dashboard running on port 3000"
-            echo "\n✅ Dashboard accessible at http://localhost:3000"
+            echo ""
+            echo "============================================================"
+            echo "✅ DEPLOYMENT SUCCESSFUL"
+            echo "============================================================"
+            echo "Dashboard URL: http://localhost:3000"
+            echo "PM2 Status: pm2 status"
+            echo "PM2 Logs: pm2 logs bgpalerter-dashboard"
+            echo "Restart: pm2 restart bgpalerter-dashboard"
+            echo "Stop: pm2 stop bgpalerter-dashboard"
+            echo "============================================================"
             return 0
         fi
+        echo "  Attempt $HTTP_ATTEMPTS: No response, waiting 3s..."
         sleep 3
         WAIT_TIME=$((WAIT_TIME + 3))
     done
     
     # Dashboard not responding after timeout
-    echo "Warning: Dashboard not responding after ${MAX_WAIT}s"
-    echo "PM2 Logs (last 50 lines):"
-    pm2 logs bgpalerter-dashboard --lines 50 --nostream || true
+    echo ""
+    echo "⚠️  WARNING: Dashboard not responding after ${MAX_WAIT}s"
+    echo ""
+    echo "PM2 shows process is online but HTTP endpoint not responding."
+    echo "This usually indicates:"
+    echo "  1. Application is still starting up (wait longer)"
+    echo "  2. Port 3000 is not being listened to (check application logs)"
+    echo "  3. Firewall blocking port 3000 (check: sudo ufw status)"
+    echo ""
+    echo "PM2 Logs (last 100 lines):"
+    pm2 logs bgpalerter-dashboard --lines 100 --nostream || true
+    echo ""
+    echo "Network Status:"
+    netstat -tlnp 2>/dev/null | grep 3000 || echo "Port 3000 not listening"
+    echo ""
+    echo "Next steps:"
+    echo "  1. Wait 30 more seconds and try: curl http://localhost:3000"
+    echo "  2. Check PM2 logs: pm2 logs bgpalerter-dashboard"
+    echo "  3. Run diagnostic: cd ../BGPalerter-frontend && ./scripts/diagnose-dashboard.sh"
+    echo "  4. Try recovery: cd ../BGPalerter-frontend && ./scripts/recover-dashboard.sh"
     output_json "warning" 98 "Dashboard deployed but not responding" "PM2 running but HTTP not ready. Check logs above."
 }
 
