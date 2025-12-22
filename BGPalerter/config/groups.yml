@@ -1,0 +1,13 @@
+groups:
+  Onwave:
+    name: "Onwave AS58173"
+    description: "Onwave prefixes"
+    asns:
+      - 58173
+  
+  Upstreams:
+    name: "Upstream Providers"
+    description: "Onwave upstream transit providers"
+    asns:
+      - 174    # Cogent Communications
+      - 6762   # Telecom Italia Sparkle

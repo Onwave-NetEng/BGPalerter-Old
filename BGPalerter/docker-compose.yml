@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  bgpalerter:
+    image: nttgin/bgpalerter:latest
+    container_name: bgpalerter
+    restart: unless-stopped
+    
+    # Port mapping for REST API
+    ports:
+      - "8011:8011"
+    
+    # Mount configuration directory
+    volumes:
+      - ./config:/opt/bgpalerter/config:ro
+      - ./logs:/opt/bgpalerter/logs
+      - bgpalerter-data:/opt/bgpalerter/data
+    
+    # Environment variables
+    environment:
+      - NODE_ENV=production
+      - TZ=UTC
+    
+    # Health check
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8011/api/v1/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    
+    # Logging configuration
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  bgpalerter-data:
+    driver: local
+
+networks:
+  default:
+    name: bgpalerter-network

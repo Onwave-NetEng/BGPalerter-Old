@@ -1,0 +1,81 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+.next/
+out/
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# PM2
+.pm2/
+ecosystem.config.js.backup
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+data/
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+.project
+.classpath
+.settings/
+
+# Docker volumes
+bgpalerter-data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Backups
+*.backup
+*.bak
+backup-*/
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Testing
+.vitest/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Misc
+.turbo/
+.vercel/
