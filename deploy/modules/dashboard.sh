@@ -29,6 +29,15 @@ pre_check() {
         exit 1
     fi
     
+    # Check if PM2 daemon is running
+    if ! pm2 ping &> /dev/null; then
+        echo "PM2 daemon not responding, attempting to start..."
+        pm2 ping &> /dev/null || {
+            output_json "error" 0 "PM2 daemon not running" "Run 'pm2 ping' to check PM2 status"
+            exit 1
+        }
+    fi
+    
     # Check if dashboard directory exists
     if [ ! -d "../BGPalerter-frontend" ]; then
         output_json "error" 0 "Dashboard directory not found" "Expected ../BGPalerter-frontend directory"
@@ -91,6 +100,10 @@ EOF
     else
         echo ".env file already exists, skipping generation"
     fi
+    
+    # Create logs directory for PM2
+    echo "Creating logs directory..."
+    mkdir -p logs
     
     # Run database migrations
     echo "Running database migrations..."

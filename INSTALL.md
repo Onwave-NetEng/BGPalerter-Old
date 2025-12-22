@@ -291,33 +291,68 @@ sudo docker compose logs -f bgpalerter
 
 **Symptom:** `pm2 status` returns empty table, dashboard not running
 
-**Root Cause:** Dashboard deployment failed due to missing environment configuration or database setup.
+**Root Causes (from Test 2 analysis):**
+1. **Hardcoded paths in ecosystem.config.js** - File contained `/home/ubuntu/` paths that don't match production server
+2. **PM2 daemon not running** - PM2 service not initialized
+3. **Missing logs directory** - PM2 cannot write logs
+4. **Missing .env file** - Environment configuration not generated
 
-**Solution:**
-1. Check if `.env` file exists:
+**Quick Fix (Recommended):**
+```bash
+cd BGPalerter-frontend
+./scripts/recover-dashboard.sh
+```
+
+This recovery script will:
+- Stop all PM2 processes
+- Clean PM2 cache and logs
+- Rebuild dashboard from scratch
+- Regenerate environment configuration
+- Re-run database migrations
+- Start fresh PM2 process
+
+**Manual Diagnosis:**
+```bash
+cd BGPalerter-frontend
+./scripts/diagnose-dashboard.sh
+```
+
+This will perform 10-point system check and identify exact failure point.
+
+**Manual Fix Steps:**
+1. Check if PM2 daemon is running:
    ```bash
-   cd ../BGPalerter-frontend
+   pm2 ping
+   ```
+   If not responding, PM2 needs to be reinitialized
+
+2. Check if `.env` file exists:
+   ```bash
+   cd BGPalerter-frontend
    ls -la .env
    ```
-2. If `.env` is missing, re-run dashboard deployment:
+
+3. Check if `ecosystem.config.js` has correct paths:
+   ```bash
+   grep "cwd:" ecosystem.config.js
+   ```
+   Should show: `cwd: __dirname` (NOT hardcoded path)
+
+4. Check if logs directory exists:
+   ```bash
+   ls -ld logs/
+   ```
+   If missing: `mkdir -p logs`
+
+5. Re-run dashboard deployment:
    ```bash
    cd ../deploy
    ./modules/dashboard.sh
    ```
-3. Verify database file was created:
-   ```bash
-   cd ../BGPalerter-frontend
-   ls -la bgpalerter.db
-   ```
-4. Check PM2 logs for startup errors:
+
+6. If deployment fails, check PM2 logs:
    ```bash
    pm2 logs bgpalerter-dashboard --lines 100
-   ```
-5. If errors persist, manually start dashboard:
-   ```bash
-   cd ../BGPalerter-frontend
-   pm2 start ecosystem.config.js
-   pm2 save
    ```
 
 ### Issue: Dashboard Not Accessible
