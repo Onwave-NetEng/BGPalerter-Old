@@ -39,9 +39,16 @@ remote: Enumerating objects: ...
 
 Navigate to the deployment directory and execute the orchestrator with all required modules.
 
+**Option A: HTTP Only (Development/Testing)**
 ```bash
 cd deploy
 ./orchestrator.py docker nodejs pnpm pm2 bgpalerter dashboard
+```
+
+**Option B: HTTPS Only (Production - Recommended)**
+```bash
+cd deploy
+sudo ./orchestrator.py docker nodejs pnpm pm2 bgpalerter dashboard nginx-https
 ```
 
 **What this does:**
@@ -51,6 +58,7 @@ cd deploy
 - Installs PM2 process manager
 - Deploys BGPalerter backend monitoring engine
 - Deploys BGPalerter dashboard web interface
+- **(Option B only)** Configures Nginx reverse proxy with HTTPS
 
 **Expected duration:** 5-10 minutes depending on internet speed
 
@@ -279,6 +287,39 @@ sudo docker compose logs -f bgpalerter
    sudo docker compose up -d
    ```
 
+### Issue: PM2 Shows No Processes (Empty Status)
+
+**Symptom:** `pm2 status` returns empty table, dashboard not running
+
+**Root Cause:** Dashboard deployment failed due to missing environment configuration or database setup.
+
+**Solution:**
+1. Check if `.env` file exists:
+   ```bash
+   cd ../BGPalerter-frontend
+   ls -la .env
+   ```
+2. If `.env` is missing, re-run dashboard deployment:
+   ```bash
+   cd ../deploy
+   ./modules/dashboard.sh
+   ```
+3. Verify database file was created:
+   ```bash
+   cd ../BGPalerter-frontend
+   ls -la bgpalerter.db
+   ```
+4. Check PM2 logs for startup errors:
+   ```bash
+   pm2 logs bgpalerter-dashboard --lines 100
+   ```
+5. If errors persist, manually start dashboard:
+   ```bash
+   cd ../BGPalerter-frontend
+   pm2 start ecosystem.config.js
+   pm2 save
+   ```
+
 ### Issue: Dashboard Not Accessible
 
 **Symptom:** Browser shows "Connection refused" or "Cannot connect"
@@ -288,16 +329,20 @@ sudo docker compose logs -f bgpalerter
    ```bash
    pm2 status
    ```
-2. Check PM2 logs:
+   **Expected:** Should show `bgpalerter-dashboard` with status `online`
+   
+2. If PM2 shows no processes, see "PM2 Shows No Processes" above
+
+3. Check PM2 logs:
    ```bash
    pm2 logs bgpalerter-dashboard
    ```
-3. Restart dashboard:
+4. Restart dashboard:
    ```bash
    cd ../BGPalerter-frontend
    pm2 restart bgpalerter-dashboard
    ```
-4. Verify port 3000 is not blocked:
+5. Verify port 3000 is not blocked:
    ```bash
    sudo netstat -tlnp | grep 3000
    ```
@@ -352,23 +397,38 @@ sudo docker compose logs -f bgpalerter
 
 For secure remote access, configure HTTPS with Nginx reverse proxy and Let's Encrypt SSL certificate.
 
-**Detailed guide:** See `BGPalerter-frontend/docs/HTTPS_SETUP.md`
+**Option A: Automated Setup (Recommended)**
 
-**Quick setup:**
+If you didn't include `nginx-https` during initial deployment, run it now:
+
 ```bash
-# Install Nginx
-sudo apt-get update
-sudo apt-get install -y nginx certbot python3-certbot-nginx
+cd deploy
+sudo ./modules/nginx-https.sh
+```
 
-# Configure Nginx (see HTTPS_SETUP.md for configuration)
-sudo nano /etc/nginx/sites-available/bgpalerter
+This will:
+- Install Nginx and Certbot
+- Configure reverse proxy with SSL
+- Set up HTTP to HTTPS redirect
+- Enable security headers
 
-# Obtain SSL certificate
+After automated setup, obtain a valid SSL certificate:
+
+```bash
+# Ensure your domain DNS points to this server
 sudo certbot --nginx -d your-domain.com
 
-# Restart Nginx
-sudo systemctl restart nginx
+# Test automatic renewal
+sudo certbot renew --dry-run
 ```
+
+**Option B: Manual Setup**
+
+For custom configurations, follow the detailed guide: `BGPalerter-frontend/docs/HTTPS_SETUP.md`
+
+**Access after HTTPS setup:**
+- HTTP: `http://your-domain.com` → Automatically redirects to HTTPS
+- HTTPS: `https://your-domain.com` → Secure dashboard access
 
 ### Configure Webhook Notifications (Optional)
 

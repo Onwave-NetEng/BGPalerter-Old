@@ -1,10 +1,10 @@
 # BGPalerter Dashboard - Engineering Design Document
 
 **Document Version:** 1.0  
-**Date:** December 22, 2025 
-**Author:** Iain Muroch 
+**Date:** December 19, 2024  
+**Author:** Manus AI  
 **Classification:** Technical Design Specification  
-**Audience:** Engineering Teams, Technical Architects, QA Engineers 
+**Audience:** Engineering Teams, Technical Architects, QA Engineers  
 
 ---
 
