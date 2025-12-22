@@ -1,55 +1,35 @@
-version: '3.8'
-
 services:
   bgpalerter:
     image: nttgin/bgpalerter:latest
     container_name: bgpalerter
     restart: unless-stopped
-    
-    # Port mapping for REST API
+
+    # Expose the REST API port for health checks (localhost only for security)
     ports:
-      - "8011:8011"
-    
-    # Mount configuration directory
+      - "127.0.0.1:8011:8011"
+
     volumes:
-      - ./config:/opt/bgpalerter/config:ro
+      # Configuration files (read-only)
+      - ./config/config.yml:/opt/bgpalerter/config.yml:ro
+      - ./config/prefixes.yml:/opt/bgpalerter/prefixes.yml:ro
+      - ./config/groups.yml:/opt/bgpalerter/groups.yml:ro
+      
+      # Logs directory (read-write so BGPalerter can write logs)
       - ./logs:/opt/bgpalerter/logs
-      - bgpalerter-data:/opt/bgpalerter/data
-    
-    # Environment variables
-    environment:
-      - NODE_ENV=production
-      - TZ=UTC
-    
-    # Health check
+      
+      # Cache directory for persistent status (prevents duplicate alerts after restart)
+      - ./cache:/opt/bgpalerter/.cache
+
+    # Health check configuration
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8011/api/v1/status"]
-      interval: 30s
-      timeout: 10s
+      test: ["CMD-SHELL", "wget --quiet --tries=1 --spider http://127.0.0.1:8011/status || exit 1"]
+      interval: 60s
+      timeout: 5s
       retries: 3
-      start_period: 60s
-    
-    # Resource limits
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
-    
-    # Logging configuration
+      start_period: 30s
+
     logging:
-      driver: "json-file"
+      driver: json-file
       options:
         max-size: "10m"
-        max-file: "3"
-
-volumes:
-  bgpalerter-data:
-    driver: local
-
-networks:
-  default:
-    name: bgpalerter-network
+        max-file: "5"

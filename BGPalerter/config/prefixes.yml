@@ -1,0 +1,113 @@
+134.0.80.0/21:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+134.0.80.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+134.0.80.0/24:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+134.0.84.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.18.48.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.18.48.0/23:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.18.48.0/24:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.18.50.0/23:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.18.50.0/24:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.96.192.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.96.192.0/23:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.96.193.0/24:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.205.160.0/23:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.205.160.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+185.205.162.0/23:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+5.61.72.0/21:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+5.61.72.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+5.61.72.0/24:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
+
+5.61.76.0/22:
+  description: Onwave UK Ltd
+  asn: 58173
+  ignoreMorespecifics: false
+  ignore: false
