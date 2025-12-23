@@ -80,6 +80,25 @@ else
     log_info "PM2 already installed: $(pm2 --version)"
 fi
 
+# Install Docker (required for BGPalerter)
+if ! command -v docker &> /dev/null; then
+    log_info "Installing Docker..."
+    apt install -y ca-certificates curl gnupg lsb-release
+    mkdir -p /etc/apt/keyrings
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+    apt update
+    apt install -y docker-ce docker-ce-cli containerd.io docker-compose-plugin
+    
+    # Add current user to docker group
+    if [ -n "$SUDO_USER" ]; then
+        usermod -aG docker $SUDO_USER
+        log_info "User $SUDO_USER added to docker group (logout/login required)"
+    fi
+else
+    log_info "Docker already installed: $(docker --version)"
+fi
+
 #############################################################################
 # Step 2: Configure MySQL Database
 #############################################################################
@@ -228,10 +247,13 @@ echo ""
 echo "IMPORTANT: Save the database password above!"
 echo ""
 echo "Useful Commands:"
-echo "  View logs:    pm2 logs bgpalerter-dashboard"
-echo "  Restart:      pm2 restart bgpalerter-dashboard"
-echo "  Stop:         pm2 stop bgpalerter-dashboard"
-echo "  Status:       pm2 status"
+echo "  Dashboard logs:    pm2 logs bgpalerter-dashboard"
+echo "  Dashboard restart: pm2 restart bgpalerter-dashboard"
+echo "  Dashboard stop:    pm2 stop bgpalerter-dashboard"
+echo "  Dashboard status:  pm2 status"
+echo ""
+echo "  BGPalerter logs:   docker logs bgpalerter --tail 50"
+echo "  BGPalerter status: docker ps | grep bgpalerter"
 echo ""
 echo "Next Steps:"
 echo "  1. Access the dashboard in your browser"
