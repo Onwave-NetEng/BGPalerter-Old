@@ -91,6 +91,23 @@ reports:
         default:
           - "iain.murdoch@onwave.com"
 
+  # Syslog reporter for heartbeats and operational logs to Alerta
+  - file: reportSyslog
+    channels: [hijack, newprefix, visibility, path, misconfiguration, rpki, roa]
+    params:
+      host: "localhost"
+      port: 514
+      transport: udp
+      templates:
+        default: "BGPalerter Heartbeat: ${type} - ${summary} | Prefix=${prefix} | ASN=${asn} | Channel=${channel}"
+        hijack: "BGPalerter Alert [HIJACK]: ${type} - ${summary} | Prefix=${prefix} | Description=${description}"
+        newprefix: "BGPalerter Alert [NEW_PREFIX]: ${type} - ${summary} | Prefix=${prefix} | Description=${description}"
+        visibility: "BGPalerter Alert [VISIBILITY]: ${type} - ${summary} | Prefix=${prefix} | Peers=${peers}"
+        path: "BGPalerter Alert [PATH]: ${type} - ${summary} | Prefix=${prefix} | Path=${path}"
+        misconfiguration: "BGPalerter Alert [MISCONFIGURATION]: ${type} - ${summary} | Prefix=${prefix} | ASN=${asn}"
+        rpki: "BGPalerter Alert [RPKI]: ${type} - ${summary} | Prefix=${prefix} | Status=${status}"
+        roa: "BGPalerter Alert [ROA]: ${type} - ${summary} | Prefix=${prefix} | Description=${description}"
+
 # Files for prefixes and groups
 monitoredPrefixesFiles:
   - prefixes.yml
